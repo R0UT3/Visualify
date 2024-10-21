@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
 # Set up Spotify API credentials
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="your_client_id",
-                                               client_secret="your_client_secret",
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="SPOTIFY_CLIENT_ID",
+                                               client_secret="SPOTIFY_CLIENT_SECRET",
                                                redirect_uri="http://localhost:5000/callback",
                                                scope="user-top-read"))
 
