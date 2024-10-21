@@ -31,6 +31,26 @@ def analyze():
         return jsonify({'tracks': track_names, 'model_results': model_results})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/callback', methods=['POST'])
+def callback():
+    data = request.json
+    auth_code = data.get('code')
+
+    if not auth_code:
+        return jsonify({'success': False, 'error': 'No authorization code provided'})
+
+    try:
+        # Exchange the authorization code for an access token
+        token_info = sp.get_access_token(auth_code)
+
+        # Save token info in session (or handle it securely)
+        #session['token_info'] = token_info
+
+        return jsonify({'success': True})  # Let the frontend know everything is good
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

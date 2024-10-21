@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading... | Spotify Analysis</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Optional for styling -->
+    <style>
+        /* Simple loading page styling */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Loading your Spotify data...</h2>
+        <div class="loader"></div>
+        <p>Please wait while we retrieve your information.</p>
+    </div>
+
+    <script>
+        // Automatically send a request to the backend after redirect with the authorization code
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const authCode = params.get('code');
+
+            if (authCode) {
+                // Send the authorization code to the backend to get the access token
+                fetch('/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: authCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to the analysis page or wherever the results will be shown
+                        window.location.href = '/analyze';
+                    } else {
+                        document.body.innerHTML = `<h2>Error loading data</h2><p>${data.error}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.body.innerHTML = `<h2>An error occurred</h2><p>${error.message}</p>`;
+                });
+            } else {
+                document.body.innerHTML = '<h2>Error: No authorization code received</h2>';
+            }
+        };
+    </script>
+</body>
+</html>
