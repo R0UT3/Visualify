@@ -7,15 +7,21 @@
     <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
-    <div class="container">
-        <h1>Spotify Song Analyzer</h1>
-        <form id="spotify-form">
-            <label for="spotify-username">Enter your Spotify username:</label>
-            <input type="text" id="spotify-username" name="spotify-username" required>
-            <button type="submit">Analyze My Songs</button>
-        </form>
-        <div id="result"></div> <!-- This will display the results -->
-    </div>
+    <p>Enter your Spotify username or upload a JSON file with your streaming data:</p>
+
+    <!-- Form for uploading a JSON file or entering a username -->
+    <form action="/analyze" method="POST" enctype="multipart/form-data">
+        <label for="username">Spotify Username (optional):</label>
+        <input type="text" id="username" name="username" placeholder="Enter your Spotify username">
+
+        <p>OR</p>
+
+        <label for="file">Upload JSON File:</label>
+        <input type="file" id="file" name="file" accept=".json">
+
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
 
     <script src="scripts.js"></script> <!-- Javascript for handling API calls -->
 </body>
