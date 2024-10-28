@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Set up Spotify API credentials
 
-client_credential_manager = SpotifyClientCredentials(client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET)
+client_credential_manager = SpotifyClientCredentials(client_id="SPOTIFY_CLIENT_ID", client_secret="SPOTIFY_CLIENT_SECRET")
 sp = spotipy.Spotify(client_credentials_manager=client_credential_manager)
 
 def allowed_file(filename):
