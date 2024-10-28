@@ -1,6 +1,6 @@
 document.getElementById('spotify-form').addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent the default form submission
-    const username = document.getElementById('spotify-username').value;
+    const username = document.getElementById('username').value;
 
     try {
         // Send the Spotify username to the backend
