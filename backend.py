@@ -30,7 +30,7 @@ def extract_useful_data(json_obj):
         "shuffle": json_obj.get("shuffle"),
         "offline": json_obj.get("offline")
     }
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['GET'])
 def analyze():
     print("HELOO")
     data = request.json
