@@ -30,6 +30,7 @@ def extract_useful_data(json_obj):
     }
 @app.route('/analyze', methods=['POST'])
 def analyze():
+    print("HELOO")
     data = request.json
     username = data.get('username')
     if username:
