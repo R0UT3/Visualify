@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Set up Spotify API credentials
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="SPOTIFY_CLIENT_ID",
                                                client_secret="SPOTIFY_CLIENT_SECRET",
-                                               redirect_uri="http://localhost:5000/callback",
+                                               redirect_uri="https://r0ut3.github.io/Visualify/loading",
                                                scope="user-top-read"))
 
 def allowed_file(filename):
