@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from dotenv import load_dotenv
 import json
@@ -9,10 +10,9 @@ load_dotenv()
 app = Flask(__name__)
 
 # Set up Spotify API credentials
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="SPOTIFY_CLIENT_ID",
-                                               client_secret="SPOTIFY_CLIENT_SECRET",
-                                               redirect_uri="https://r0ut3.github.io/Visualify/loading",
-                                               scope="user-top-read"))
+
+client_credential_manager = SpotifyClientCredentials(client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET)
+sp = spotipy.Spotify(client_credentials_manager=client_credential_manager)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'json'
@@ -47,7 +47,7 @@ def analyze():
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    # Case 2: User uploads a JSON file
+"""     # Case 2: User uploads a JSON file
     if 'file' not in request.files:
         return "No file part", 400
 
@@ -96,7 +96,7 @@ def callback():
 
         return jsonify({'success': True})  # Let the frontend know everything is good
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500 """
 
 
 if __name__ == '__main__':
