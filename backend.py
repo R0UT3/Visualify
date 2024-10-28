@@ -4,10 +4,12 @@ from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
 import json
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "https://r0ut3.github.io/"}})
 
 # Set up Spotify API credentials
 
