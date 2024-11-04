@@ -91,19 +91,36 @@ def analyze():
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
+    if not code:
+        return jsonify({'error': 'No authorization code provided'}), 400
+    
     token_url = "https://accounts.spotify.com/api/token"
-    response = requests.post(token_url, data={
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "client_id": SPOTIFY_CLIENT_ID,
-        "client_secret": SPOTIFY_CLIENT_SECRET
-    })
+    try:
+        response = requests.post(token_url, data={
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": REDIRECT_URI,
+            "client_id": SPOTIFY_CLIENT_ID,
+            "client_secret": SPOTIFY_CLIENT_SECRET
+        })
 
-    token_info = response.json()
-    access_token = token_info.get("access_token")
-    session['access_token'] = access_token
-    return redirect('/analyze')
+        if response.status_code != 200:
+            # Log response content for debugging
+            print("Token request failed:", response.content)
+            return jsonify({'error': 'Failed to retrieve access token', 'details': response.content}), 500
+        
+        token_info = response.json()
+        access_token = token_info.get("access_token")
+        
+        if not access_token:
+            return jsonify({'error': 'Access token not found in response'}), 500
+        
+        session['access_token'] = access_token
+        return redirect('/analyze')
+
+    except Exception as e:
+        print("Error during token exchange:", str(e))
+        return jsonify({'error': 'Exception during token exchange', 'details': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
