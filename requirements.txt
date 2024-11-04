@@ -20,5 +20,4 @@ six==1.16.0
 tenacity==8.0.1
 Werkzeug==2.0.2
 spotipy
-os
-dotenv
+
