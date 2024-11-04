@@ -21,3 +21,4 @@ tenacity==8.0.1
 Werkzeug==2.0.2
 spotipy
 python-dotenv
+flask_cors
