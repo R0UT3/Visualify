@@ -17,9 +17,9 @@ SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:3000"}})
+CORS(app, resources={r"/*": {"origins": "https://visualify.onrender.com"}})
 SPOTIFY_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
-REDIRECT_URI = "http://127.0.0.1:5000/callback"  # Or your deployed URL
+REDIRECT_URI = "https://visualifybackend.onrender.com/callback"  # Or your deployed URL
 SCOPE = "user-top-read"  # The scope required to access top tracks
 
 @app.route('/login')

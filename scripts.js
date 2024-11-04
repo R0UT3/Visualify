@@ -5,7 +5,7 @@ document.getElementById('spotify-form').addEventListener('submit', async (e) => 
 
     try {
         // Send the Spotify username to the backend
-        const response = await fetch(`http://127.0.0.1:5000/analyze?username=${encodeURIComponent(username)}`, {
+        const response = await fetch(`https://visualifybackend.onrender.com/analyze?username=${encodeURIComponent(username)}`, {
             method: 'GET'
         });
         console.log("hasta aqui")
