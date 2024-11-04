@@ -11,12 +11,14 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 
 
 
 app = Flask(__name__)
+app.secret_key=SECRET_KEY
 CORS(app, resources={r"/*": {"origins": "https://visualify.onrender.com"}})
 SPOTIFY_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
 REDIRECT_URI = "https://visualifybackend.onrender.com/callback"  # Or your deployed URL
