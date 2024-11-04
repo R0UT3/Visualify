@@ -19,7 +19,7 @@ SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:3000"}})
 SPOTIFY_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
-REDIRECT_URI = "http://127.0.0.1:5000/callback"  # Or your deployed URL
+REDIRECT_URI = "http://localhost:5000/callback"  # Or your deployed URL
 SCOPE = "user-top-read"  # The scope required to access top tracks
 
 @app.route('/login')
@@ -45,16 +45,25 @@ def extract_useful_data(json_obj):
         "shuffle": json_obj.get("shuffle"),
         "offline": json_obj.get("offline")
     }
-@app.route('/analyze')
+@app.route('/analyze', methods=['GET'])
 def analyze():
-    access_token = session.get('access_token')
-    if not access_token:
-        return redirect('/login')
+    print("HELOO")
+    username = request.args.get('username')
+    print(username)
+    if username:
+        # Handle the case where the user inputs their Spotify username
+        try:
+            user_tracks = sp.current_user_top_tracks(limit=50)
+            # Extract track names and other data
+            track_names = [track['name'] for track in user_tracks['items']]
 
-    sp = spotipy.Spotify(auth=access_token)
-    user_tracks = sp.current_user_top_tracks(limit=50)
-    track_names = [track['name'] for track in user_tracks['items']]
-    return jsonify(track_names)
+            # You will need to process the track names through the Spotify API for danceability, etc.
+
+            # Placeholder for model results (replace with actual model calls)
+            model_results = {"message": "Model predictions would go here."}
+            return jsonify({'tracks': track_names, 'model_results': model_results})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 """     # Case 2: User uploads a JSON file
     if 'file' not in request.files:

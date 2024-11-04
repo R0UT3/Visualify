@@ -7,10 +7,13 @@
     <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
+    <a href="http://127.0.0.1:5000/login">
+        <button>Log in with Spotify</button>
+    </a>
     <p>Enter your Spotify username or upload a JSON file with your streaming data:</p>
 
     <!-- Form for uploading a JSON file or entering a username -->
-    <form >
+    <form id="spotify-form">
         <label for="username">Spotify Username (optional):</label>
         <input type="text" id="username" name="username" placeholder="Enter your Spotify username">
 
@@ -22,6 +25,7 @@
         <br><br>
         <button type="submit">Submit</button>
     </form>
+    <div id="result"></div>
 
     <script src="scripts.js"></script> <!-- Javascript for handling API calls -->
 </body>
