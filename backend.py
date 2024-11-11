@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify, redirect, session
 import spotipy
 from dash import Dash, html, dcc
+from dash.dependencies import Input, Output
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
@@ -118,9 +119,9 @@ dash_app.layout = html.Div([
 ])  
 # Callbacks to update graphs
 @dash_app.callback(
-    [dcc.Output('top-tracks-graph', 'figure'),
-     dcc.Output('top-artists-graph', 'figure'),
-     dcc.Output('recommended-tracks-graph', 'figure')],
+    [Output('top-tracks-graph', 'figure'),
+     Output('top-artists-graph', 'figure'),
+     Output('recommended-tracks-graph', 'figure')],
     []
 )
 def update_graphs():
