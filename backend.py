@@ -1,6 +1,7 @@
 
 from flask import Flask, request, jsonify, redirect, session
 import spotipy
+from dash import Dash, html, dcc
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
@@ -43,6 +44,8 @@ def extract_useful_data(json_obj):
         "shuffle": json_obj.get("shuffle"),
         "offline": json_obj.get("offline")
     }
+spotify_data = {}
+
 @app.route('/analyze')
 def analyze():
     access_token = session.get('access_token')
@@ -50,9 +53,20 @@ def analyze():
         return redirect('/login')
 
     sp = spotipy.Spotify(auth=access_token)
-    user_tracks = sp.current_user_top_tracks(limit=50)
-    track_names = [track['name'] for track in user_tracks['items']]
-    return jsonify(track_names)
+    top5_tracks = sp.current_user_top_tracks(limit=5)
+    top5_artists = sp.current_user_top_artists(limit=5)
+    track_names = [track['name'] for track in top5_tracks['items']]
+    spotify_data['top_tracks'] = [{
+            'name': track['name'],
+            'popularity': track['popularity'],
+            'artist': track['artists'][0]['name']
+        } for track in top5_tracks['items']]
+
+    spotify_data['top_artists'] = [{
+            'name': artist['name'],
+            'popularity': artist['popularity']
+        } for artist in top5_artists['items']]
+    return redirect('/dash')
 
 """     # Case 2: User uploads a JSON file
     if 'file' not in request.files:
@@ -85,7 +99,57 @@ def analyze():
     return "Invalid file format", 400
     # Fetch Spotify data for this user
     """
+dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
+
+# Layout for Dash
+dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
     
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(id='top-tracks-graph'),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(id='top-artists-graph'),
+
+    html.H2("Recommended Songs Based on Top Tracks"),
+    dcc.Graph(id='recommended-tracks-graph')
+])  
+# Callbacks to update graphs
+@dash_app.callback(
+    [dcc.Output('top-tracks-graph', 'figure'),
+     dcc.Output('top-artists-graph', 'figure'),
+     dcc.Output('recommended-tracks-graph', 'figure')],
+    []
+)
+def update_graphs():
+    top_tracks = spotify_data.get('top_tracks', [])
+    top_artists = spotify_data.get('top_artists', [])
+
+    # Top Tracks Graph
+    top_tracks_fig = px.bar(
+        x=[track['name'] for track in top_tracks],
+        y=[track['popularity'] for track in top_tracks],
+        labels={'x': 'Track', 'y': 'Popularity'},
+        title="Top 5 Tracks by Popularity"
+    )
+
+    # Top Artists Graph
+    top_artists_fig = px.bar(
+        x=[artist['name'] for artist in top_artists],
+        y=[artist['popularity'] for artist in top_artists],
+        labels={'x': 'Artist', 'y': 'Popularity'},
+        title="Top 5 Artists by Popularity"
+    )
+
+    # Placeholder for recommended songs (similar songs to top tracks)
+    recommended_fig = px.bar(
+        x=["Song A", "Song B", "Song C", "Song D", "Song E"],  # Placeholder names
+        y=[80, 75, 85, 78, 82],  # Placeholder scores
+        labels={'x': 'Recommended Song', 'y': 'Similarity Score'},
+        title="Recommended Songs Based on Top Tracks"
+    )
+
+    return top_tracks_fig, top_artists_fig, recommended_fig 
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
