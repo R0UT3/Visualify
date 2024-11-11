@@ -72,7 +72,8 @@ def analyze():
     session['track_data'] = spotify_data['top_tracks']
     session['artist_data'] = spotify_data['top_artists']
     print(jsonify(track_names))
-    return redirect('/dash')
+    #return redirect('/dash')
+    return jsonify(track_names)
 
 """     # Case 2: User uploads a JSON file
     if 'file' not in request.files:
