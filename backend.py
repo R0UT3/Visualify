@@ -72,8 +72,7 @@ def analyze():
     session['track_data'] = spotify_data['top_tracks']
     session['artist_data'] = spotify_data['top_artists']
     print(jsonify(track_names))
-    #return redirect('/dash')
-    return jsonify(track_names)
+    return redirect('/dash')
 
 """     # Case 2: User uploads a JSON file
     if 'file' not in request.files:
@@ -109,6 +108,7 @@ def analyze():
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
 # Layout for Dash
+# Layout for Dash
 dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
     
@@ -119,8 +119,13 @@ dash_app.layout = html.Div([
     dcc.Graph(id='top-artists-graph'),
 
     html.H2("Recommended Songs Based on Top Tracks"),
-    dcc.Graph(id='recommended-tracks-graph')
+    dcc.Graph(id='recommended-tracks-graph'),
+
+    # Hidden storage components to hold data from Flask session
+    dcc.Store(id='stored-top-tracks', data=session.get('track_data', [])),
+    dcc.Store(id='stored-top-artists', data=session.get('artist_data', []))
 ])  
+
 # Callbacks to update graphs
 """ @dash_app.callback(
     [Output('top-tracks-graph', 'figure'),
@@ -128,43 +133,38 @@ dash_app.layout = html.Div([
      Output('recommended-tracks-graph', 'figure')],
     []
 ) """
+from dash.dependencies import Input, Output
+
 @dash_app.callback(
-    [Output('top-tracks-graph', 'figure'), Output('top-artists-graph', 'figure')],
-    Input('top-tracks-graph', 'id')  # Dummy input to trigger on page load
+    [Output('top-tracks-graph', 'figure'),
+     Output('top-artists-graph', 'figure')],
+    [Input('stored-top-tracks', 'data'), 
+     Input('stored-top-artists', 'data')]
 )
-def update_graphs():
-    top_tracks = session.get('track_data', [])
-    top_artists = session.get('artist_data', [])
-    # Top Tracks Graph
-    top_tracks_fig = px.bar(
-        x=[track['name'] for track in top_tracks],
-        y=[track['popularity'] for track in top_tracks],
-        labels={'x': 'Track', 'y': 'Popularity'},
-        title="Top 5 Tracks by Popularity"
-    )
-    track_df = pd.DataFrame(top_tracks)
-    artist_df = pd.DataFrame(top_artists)
+def update_graphs(top_tracks, top_artists):
+    # Create Top Tracks Graph
+    if top_tracks:
+        top_tracks_fig = px.bar(
+            x=[track['name'] for track in top_tracks],
+            y=[track['popularity'] for track in top_tracks],
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        )
+    else:
+        top_tracks_fig = px.bar(title="No Data Available for Top Tracks")
 
-    px.bar(track_df, x='track_name', y=track_df.index, title="Top 5 Tracks")
-    px.bar(artist_df, x='artist_name', y='popularity', title="Top 5 Artists")
+    # Create Top Artists Graph
+    if top_artists:
+        top_artists_fig = px.bar(
+            x=[artist['name'] for artist in top_artists],
+            y=[artist['popularity'] for artist in top_artists],
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        )
+    else:
+        top_artists_fig = px.bar(title="No Data Available for Top Artists")
 
-    # Top Artists Graph
-    top_artists_fig = px.bar(
-        x=[artist['name'] for artist in top_artists],
-        y=[artist['popularity'] for artist in top_artists],
-        labels={'x': 'Artist', 'y': 'Popularity'},
-        title="Top 5 Artists by Popularity"
-    )
-
-    # Placeholder for recommended songs (similar songs to top tracks)
-    recommended_fig = px.bar(
-        x=["Song A", "Song B", "Song C", "Song D", "Song E"],  # Placeholder names
-        y=[80, 75, 85, 78, 82],  # Placeholder scores
-        labels={'x': 'Recommended Song', 'y': 'Similarity Score'},
-        title="Recommended Songs Based on Top Tracks"
-    )
-
-    return top_tracks_fig, top_artists_fig, recommended_fig 
+    return top_tracks_fig, top_artists_fig
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
