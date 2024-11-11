@@ -5,6 +5,7 @@ from dash import Dash, html, dcc
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
+import pandas as pd
 import plotly.express as px
 from dotenv import load_dotenv
 from flask_cors import CORS
