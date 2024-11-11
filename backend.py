@@ -69,6 +69,9 @@ def analyze():
             'name': artist['name'],
             'popularity': artist['popularity']
         } for artist in top5_artists['items']]
+    session['track_data'] = spotify_data['top_tracks']
+    session['artist_data'] = spotify_data['top_artists']
+    print(jsonify(track_names))
     return redirect('/dash')
 
 """     # Case 2: User uploads a JSON file
@@ -129,9 +132,8 @@ dash_app.layout = html.Div([
     Input('top-tracks-graph', 'id')  # Dummy input to trigger on page load
 )
 def update_graphs():
-    top_tracks = spotify_data.get('top_tracks', [])
-    top_artists = spotify_data.get('top_artists', [])
-
+    top_tracks = session.get('track_data', [])
+    top_artists = session.get('artist_data', [])
     # Top Tracks Graph
     top_tracks_fig = px.bar(
         x=[track['name'] for track in top_tracks],
@@ -139,6 +141,11 @@ def update_graphs():
         labels={'x': 'Track', 'y': 'Popularity'},
         title="Top 5 Tracks by Popularity"
     )
+    track_df = pd.DataFrame(top_tracks)
+    artist_df = pd.DataFrame(top_artists)
+
+    px.bar(track_df, x='track_name', y=track_df.index, title="Top 5 Tracks")
+    px.bar(artist_df, x='artist_name', y='popularity', title="Top 5 Artists")
 
     # Top Artists Graph
     top_artists_fig = px.bar(
