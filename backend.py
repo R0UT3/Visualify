@@ -118,11 +118,15 @@ dash_app.layout = html.Div([
     dcc.Graph(id='recommended-tracks-graph')
 ])  
 # Callbacks to update graphs
-@dash_app.callback(
+""" @dash_app.callback(
     [Output('top-tracks-graph', 'figure'),
      Output('top-artists-graph', 'figure'),
      Output('recommended-tracks-graph', 'figure')],
     []
+) """
+@dash_app.callback(
+    [Output('top-tracks-graph', 'figure'), Output('top-artists-graph', 'figure')],
+    Input('top-tracks-graph', 'id')  # Dummy input to trigger on page load
 )
 def update_graphs():
     top_tracks = spotify_data.get('top_tracks', [])
