@@ -1,5 +1,5 @@
 
-from flask import Flask, request, jsonify, redirect, session
+from flask import Flask, request, jsonify, redirect, session, render_template
 import spotipy
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
@@ -72,7 +72,10 @@ def analyze():
     session['track_data'] = spotify_data['top_tracks']
     session['artist_data'] = spotify_data['top_artists']
     print(jsonify(track_names))
-    return redirect('/dash')
+    #return redirect('/dash')
+    return render_template('dash.html', 
+                           track_data=json.dumps(spotify_data['top_tracks']), 
+                           artist_data=json.dumps(spotify_data['top_artists']))
 
 """     # Case 2: User uploads a JSON file
     if 'file' not in request.files:
@@ -111,7 +114,7 @@ dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 # Layout for Dash
 dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
-    
+
     html.H2("Top 5 Tracks"),
     dcc.Graph(id='top-tracks-graph'),
 
@@ -121,20 +124,10 @@ dash_app.layout = html.Div([
     html.H2("Recommended Songs Based on Top Tracks"),
     dcc.Graph(id='recommended-tracks-graph'),
 
-    # Hidden storage components to hold data from Flask session
-    dcc.Store(id='stored-top-tracks', data=session.get('track_data', [])),
-    dcc.Store(id='stored-top-artists', data=session.get('artist_data', []))
-])  
-
-# Callbacks to update graphs
-""" @dash_app.callback(
-    [Output('top-tracks-graph', 'figure'),
-     Output('top-artists-graph', 'figure'),
-     Output('recommended-tracks-graph', 'figure')],
-    []
-) """
-from dash.dependencies import Input, Output
-
+    # Hidden storage components for Dash callbacks
+    dcc.Store(id='stored-top-tracks'),
+    dcc.Store(id='stored-top-artists')
+])
 @dash_app.callback(
     [Output('top-tracks-graph', 'figure'),
      Output('top-artists-graph', 'figure')],
@@ -142,29 +135,28 @@ from dash.dependencies import Input, Output
      Input('stored-top-artists', 'data')]
 )
 def update_graphs(top_tracks, top_artists):
-    # Create Top Tracks Graph
-    if top_tracks:
-        top_tracks_fig = px.bar(
-            x=[track['name'] for track in top_tracks],
-            y=[track['popularity'] for track in top_tracks],
-            labels={'x': 'Track', 'y': 'Popularity'},
-            title="Top 5 Tracks by Popularity"
-        )
-    else:
-        top_tracks_fig = px.bar(title="No Data Available for Top Tracks")
+    # Check if data is available
+    if not top_tracks or not top_artists:
+        return {}, {}
 
-    # Create Top Artists Graph
-    if top_artists:
-        top_artists_fig = px.bar(
-            x=[artist['name'] for artist in top_artists],
-            y=[artist['popularity'] for artist in top_artists],
-            labels={'x': 'Artist', 'y': 'Popularity'},
-            title="Top 5 Artists by Popularity"
-        )
-    else:
-        top_artists_fig = px.bar(title="No Data Available for Top Artists")
+    # Top Tracks Graph
+    top_tracks_fig = px.bar(
+        x=[track['name'] for track in top_tracks],
+        y=[track['popularity'] for track in top_tracks],
+        labels={'x': 'Track', 'y': 'Popularity'},
+        title="Top 5 Tracks by Popularity"
+    )
+
+    # Top Artists Graph
+    top_artists_fig = px.bar(
+        x=[artist['name'] for artist in top_artists],
+        y=[artist['popularity'] for artist in top_artists],
+        labels={'x': 'Artist', 'y': 'Popularity'},
+        title="Top 5 Artists by Popularity"
+    )
 
     return top_tracks_fig, top_artists_fig
+
 @app.route('/callback')
 def callback():
     code = request.args.get('code')

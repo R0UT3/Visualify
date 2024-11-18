@@ -1,0 +1,24 @@
+<!-- templates/dash.html -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Spotify Dash</title>
+        <!-- Dash assets -->
+        {{ dash_assets }}
+    </head>
+    <body>
+        <div id="dash-container">
+            <script>
+                const topTracks = JSON.parse(`{{ track_data | tojson | safe }}`);
+                const topArtists = JSON.parse(`{{ artist_data | tojson | safe }}`);
+
+
+
+                // Set data into Dash's hidden components
+                document.getElementById("stored-top-tracks").data = topTracks;
+                document.getElementById("stored-top-artists").data = topArtists;
+            </script>
+        </div>
+    </body>
+</html>
+
