@@ -75,10 +75,10 @@ def analyze():
     print(jsonify(track_names))
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
-if dfTracks is None or dfArtists is None:
-    # Placeholder data to prevent errors
-    dfTracks = pd.DataFrame({'name': [], 'popularity': [], 'artist': []})
-    dfArtists = pd.DataFrame({'name': [], 'popularity': []})
+if dfTracks is None:
+        dfTracks = pd.DataFrame({'name': [], 'popularity': [], 'artist': []})
+if dfArtists is None:
+     dfArtists = pd.DataFrame({'name': [], 'popularity': []})
 
 dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
