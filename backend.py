@@ -78,31 +78,9 @@ dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
 # Layout for Dash
 # Layout for Dash
-dash_app.layout = html.Div([
-    html.H1("Spotify Data Visualization"),
-
-    html.H2("Top 5 Tracks"),
-    dcc.Graph(id='top-tracks-graph'),
-
-    html.H2("Top 5 Artists"),
-    dcc.Graph(id='top-artists-graph'),
-
-    html.H2("Recommended Songs Based on Top Tracks"),
-    dcc.Graph(id='recommended-tracks-graph'),
-
-])
-@dash_app.callback(
-    [Output('top-tracks-graph', 'figure'),
-     Output('top-artists-graph', 'figure')]
-)
-def update_graphs(top_tracks, top_artists):
-    global dfTracks, dfArtists
     # Check if data is available
-    if not top_tracks or not top_artists:
-        return {}, {}
-
     # Top Tracks Graph
-    top_tracks_fig = px.bar(dfTracks,
+top_tracks_fig = px.bar(dfTracks,
         x='name',
         y='popularity',
         labels={'x': 'Track', 'y': 'Popularity'},
@@ -110,14 +88,25 @@ def update_graphs(top_tracks, top_artists):
     )
 
     # Top Artists Graph
-    top_artists_fig = px.bar(dfArtists,
+top_artists_fig = px.bar(dfArtists,
         x='name',
         y='popularity',
         labels={'x': 'Artist', 'y': 'Popularity'},
         title="Top 5 Artists by Popularity"
     )
+dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
 
-    return top_tracks_fig, top_artists_fig
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(id='top-tracks-graph',figure=top_tracks_fig),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(id='top-artists-graph',figure=top_artists_fig),
+
+    html.H2("Recommended Songs Based on Top Tracks"),
+    dcc.Graph(id='recommended-tracks-graph')
+
+])
 
 @app.route('/callback')
 def callback():
