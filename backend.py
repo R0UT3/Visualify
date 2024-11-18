@@ -15,7 +15,8 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-df=pd.DataFrame()
+dfTracks=pd.DataFrame()
+dfArtists=pd.DataFrame()
 
 
 app = Flask(__name__)
@@ -61,12 +62,17 @@ def analyze():
     top5_artists = sp.current_user_top_artists(limit=5)
     track_names = [track['name'] for track in top5_tracks['items']]
     artists_names = [artist['name'] for artist in top5_artists['items']]
-
-    df['top_tracks']=track_names
-    df['top_artists']=artists_names
+    dfTracks = pd.DataFrame([{
+        'name': track['name'],
+        'popularity': track['popularity'],
+        'artist': track['artists'][0]['name']
+    } for track in top5_tracks['items']])
+    dfArtists = pd.DataFrame([{
+        'name': artist['name'],
+        'popularity': artist['popularity']
+        } for artist in top5_artists['items']])
     print(jsonify(track_names))
-    #return redirect('/dash')
-    return jsonify(track_names)
+    return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
 # Layout for Dash
@@ -94,17 +100,17 @@ def update_graphs(top_tracks, top_artists):
         return {}, {}
 
     # Top Tracks Graph
-    top_tracks_fig = px.bar(df['top_tracks'],
-        x=[track['name'] for track in top_tracks],
-        y=[track['popularity'] for track in top_tracks],
+    top_tracks_fig = px.bar(dfTracks,
+        x='name',
+        y='popularity',
         labels={'x': 'Track', 'y': 'Popularity'},
         title="Top 5 Tracks by Popularity"
     )
 
     # Top Artists Graph
-    top_artists_fig = px.bar(df['top_artists'],
-        x=[artist['name'] for artist in top_artists],
-        y=[artist['popularity'] for artist in top_artists],
+    top_artists_fig = px.bar(dfArtists,
+        x='name',
+        y='popularity',
         labels={'x': 'Artist', 'y': 'Popularity'},
         title="Top 5 Artists by Popularity"
     )
