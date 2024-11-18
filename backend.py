@@ -65,8 +65,8 @@ def analyze():
     df['top_tracks']=track_names
     df['top_artists']=artists_names
     print(jsonify(track_names))
-    return redirect('/dash')
-
+    #return redirect('/dash')
+    return jsonify(track_names)
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
 # Layout for Dash
