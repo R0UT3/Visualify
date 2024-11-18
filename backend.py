@@ -77,12 +77,13 @@ def analyze():
     session['dfArtists'] = dfArtists.to_json(orient='split')
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
+dfTracks = pd.read_json(session.get('dfTracks', '{}'), orient='split') if session.get('dfTracks') else None
+dfArtists = pd.read_json(session.get('dfArtists', '{}'), orient='split') if session.get('dfArtists') else None
 if dfTracks is None:
         dfTracks = pd.DataFrame({'name': [], 'popularity': [], 'artist': []})
 if dfArtists is None:
      dfArtists = pd.DataFrame({'name': [], 'popularity': []})
-dfTracks = pd.read_json(session.get('dfTracks', '{}'), orient='split') if session.get('dfTracks') else None
-dfArtists = pd.read_json(session.get('dfArtists', '{}'), orient='split') if session.get('dfArtists') else None
+
 dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
 
