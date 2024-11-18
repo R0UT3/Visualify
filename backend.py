@@ -15,6 +15,7 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+df=pd.DataFrame()
 
 
 app = Flask(__name__)
@@ -59,22 +60,12 @@ def analyze():
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
     track_names = [track['name'] for track in top5_tracks['items']]
-    spotify_data['top_tracks'] = [{
-            'name': track['name'],
-            'popularity': track['popularity'],
-            'artist': track['artists'][0]['name']
-        } for track in top5_tracks['items']]
+    artists_names = [artist['name'] for artist in top5_artists['items']]
 
-    spotify_data['top_artists'] = [{
-            'name': artist['name'],
-            'popularity': artist['popularity']
-        } for artist in top5_artists['items']]
-    session['track_data'] = spotify_data['top_tracks']
-    session['artist_data'] = spotify_data['top_artists']
+    df['top_tracks']=track_names
+    df['top_artists']=artists_names
     print(jsonify(track_names))
     return redirect('/dash')
-print("Track Data:", session.get('track_data'))
-print("Artist Data:", session.get('artist_data'))
 
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
@@ -92,15 +83,10 @@ dash_app.layout = html.Div([
     html.H2("Recommended Songs Based on Top Tracks"),
     dcc.Graph(id='recommended-tracks-graph'),
 
-    # Hidden storage components for Dash callbacks
-    dcc.Store(id='stored-top-tracks'),
-    dcc.Store(id='stored-top-artists')
 ])
 @dash_app.callback(
     [Output('top-tracks-graph', 'figure'),
-     Output('top-artists-graph', 'figure')],
-    [Input('stored-top-tracks', 'data'), 
-     Input('stored-top-artists', 'data')]
+     Output('top-artists-graph', 'figure')]
 )
 def update_graphs(top_tracks, top_artists):
     # Check if data is available
@@ -108,7 +94,7 @@ def update_graphs(top_tracks, top_artists):
         return {}, {}
 
     # Top Tracks Graph
-    top_tracks_fig = px.bar(
+    top_tracks_fig = px.bar(df['top_tracks'],
         x=[track['name'] for track in top_tracks],
         y=[track['popularity'] for track in top_tracks],
         labels={'x': 'Track', 'y': 'Popularity'},
@@ -116,7 +102,7 @@ def update_graphs(top_tracks, top_artists):
     )
 
     # Top Artists Graph
-    top_artists_fig = px.bar(
+    top_artists_fig = px.bar(df['top_artists'],
         x=[artist['name'] for artist in top_artists],
         y=[artist['popularity'] for artist in top_artists],
         labels={'x': 'Artist', 'y': 'Popularity'},
