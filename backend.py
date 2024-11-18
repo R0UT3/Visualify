@@ -75,38 +75,42 @@ def analyze():
     print(jsonify(track_names))
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
+if dfTracks is None or dfArtists is None:
+    # Placeholder data to prevent errors
+    dfTracks = pd.DataFrame({'name': [], 'popularity': [], 'artist': []})
+    dfArtists = pd.DataFrame({'name': [], 'popularity': []})
 
-# Layout for Dash
-# Layout for Dash
-    # Check if data is available
-    # Top Tracks Graph
-top_tracks_fig = px.bar(dfTracks,
-        x='name',
-        y='popularity',
-        labels={'x': 'Track', 'y': 'Popularity'},
-        title="Top 5 Tracks by Popularity"
-    )
-
-    # Top Artists Graph
-top_artists_fig = px.bar(dfArtists,
-        x='name',
-        y='popularity',
-        labels={'x': 'Artist', 'y': 'Popularity'},
-        title="Top 5 Artists by Popularity"
-    )
 dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
 
     html.H2("Top 5 Tracks"),
-    dcc.Graph(id='top-tracks-graph',figure=top_tracks_fig),
+    dcc.Graph(
+        id='top-tracks-graph',
+        figure=px.bar(
+            dfTracks,
+            x='name',
+            y='popularity',
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        ) if not dfTracks.empty else px.bar(title="No Tracks Available")
+    ),
 
     html.H2("Top 5 Artists"),
-    dcc.Graph(id='top-artists-graph',figure=top_artists_fig),
+    dcc.Graph(
+        id='top-artists-graph',
+        figure=px.bar(
+            dfArtists,
+            x='name',
+            y='popularity',
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        ) if not dfArtists.empty else px.bar(title="No Artists Available")
+    ),
 
     html.H2("Recommended Songs Based on Top Tracks"),
-    dcc.Graph(id='recommended-tracks-graph')
-
+    dcc.Graph(id='recommended-tracks-graph')  # This will be updated dynamically later
 ])
+
 
 @app.route('/callback')
 def callback():
