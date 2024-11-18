@@ -69,46 +69,13 @@ def analyze():
             'name': artist['name'],
             'popularity': artist['popularity']
         } for artist in top5_artists['items']]
-    session['track_data'] = json.dumps(spotify_data['top_tracks'])
-    session['artist_data'] = json.dumps(spotify_data['top_artists'])
-
+    session['track_data'] = spotify_data['top_tracks']
+    session['artist_data'] = spotify_data['top_artists']
     print(jsonify(track_names))
     return redirect('/dash')
 print("Track Data:", session.get('track_data'))
 print("Artist Data:", session.get('artist_data'))
 
-
-"""     # Case 2: User uploads a JSON file
-    if 'file' not in request.files:
-        return "No file part", 400
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return "No selected file", 400
-
-    if file and allowed_file(file.filename):
-        filename = file.filename
-        file_data = file.read().decode('utf-8')
-
-        try:
-            json_data = json.loads(file_data)
-
-            # If it's a list of JSON objects (like streaming history):
-            if isinstance(json_data, list):
-                extracted_data_list = [extract_useful_data(item) for item in json_data]
-            else:
-                # Handle the case where it's a single JSON object
-                extracted_data_list = [extract_useful_data(json_data)]
-
-            return jsonify(extracted_data_list)
-
-        except json.JSONDecodeError:
-            return "Invalid JSON file", 400
-
-    return "Invalid file format", 400
-    # Fetch Spotify data for this user
-    """
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 
 # Layout for Dash
@@ -126,8 +93,8 @@ dash_app.layout = html.Div([
     dcc.Graph(id='recommended-tracks-graph'),
 
     # Hidden storage components for Dash callbacks
-    dcc.Store(id='stored-top-tracks', data=session.get('track_data', [])),
-    dcc.Store(id='stored-top-artists', data=session.get('artist_data', []))
+    dcc.Store(id='stored-top-tracks'),
+    dcc.Store(id='stored-top-artists')
 ])
 @dash_app.callback(
     [Output('top-tracks-graph', 'figure'),
@@ -136,11 +103,6 @@ dash_app.layout = html.Div([
      Input('stored-top-artists', 'data')]
 )
 def update_graphs(top_tracks, top_artists):
-    top_tracks = json.loads(top_tracks) if top_tracks else []
-    top_artists = json.loads(top_artists) if top_artists else []
-    # Debugging: Print received data for verification
-    print("Top Tracks Data:", top_tracks)
-    print("Top Artists Data:", top_artists)
     # Check if data is available
     if not top_tracks or not top_artists:
         return {}, {}
