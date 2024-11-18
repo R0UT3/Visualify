@@ -15,8 +15,8 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-dfTracks=pd.DataFrame()
-dfArtists=pd.DataFrame()
+dfTracks=None
+dfArtists=None
 
 
 app = Flask(__name__)
@@ -53,6 +53,7 @@ spotify_data = {}
 
 @app.route('/analyze')
 def analyze():
+    global dfTracks, dfArtists
     access_token = session.get('access_token')
     if not access_token:
         return redirect('/login')
@@ -95,6 +96,7 @@ dash_app.layout = html.Div([
      Output('top-artists-graph', 'figure')]
 )
 def update_graphs(top_tracks, top_artists):
+    global dfTracks, dfArtists
     # Check if data is available
     if not top_tracks or not top_artists:
         return {}, {}
