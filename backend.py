@@ -132,7 +132,7 @@ def update_graphs(n_intervals):
     try:
         response = requests.get('https://visualify.onrender.com/api/get_data')  # Adjust URL for deployment
         if response.status_code != 200:
-            raise ValueError("Data not availableOtro")
+            raise ValueError("Data not availableOtro{}",response.status_code)
 
         data = response.json()
         tracks = pd.DataFrame(data['tracks'])
