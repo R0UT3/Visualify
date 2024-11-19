@@ -73,12 +73,11 @@ def analyze():
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
     print(jsonify(track_names),flush=True)
-
+    session['track']=2
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
-dash_app.layout = html.Div([
+""" dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
-
     html.H2("Top 5 Tracks"),
     dcc.Graph(
         id='top-tracks-graph',
@@ -105,7 +104,73 @@ dash_app.layout = html.Div([
 
     html.H2("Recommended Songs Based on Top Tracks"),
     dcc.Graph(id='recommended-tracks-graph')  # This will be updated dynamically later
+]) """
+from dash.dependencies import Output, Input
+import requests
+
+dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
+
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(id='top-tracks-graph'),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(id='top-artists-graph'),
+
+    dcc.Interval(
+        id='data-fetch-interval',
+        interval=1000,  # Check for data every second
+        n_intervals=0
+    )
 ])
+
+@dash_app.callback(
+    [Output('top-tracks-graph', 'figure'),
+     Output('top-artists-graph', 'figure')],
+    [Input('data-fetch-interval', 'n_intervals')]
+)
+def update_graphs(n_intervals):
+    try:
+        response = requests.get('https://visualify.onrender.com/api/get_data')  # Adjust URL for deployment
+        if response.status_code != 200:
+            raise ValueError("Data not available")
+
+        data = response.json()
+        tracks = pd.DataFrame(data['tracks'])
+        artists = pd.DataFrame(data['artists'])
+
+        top_tracks_fig = px.bar(
+            tracks,
+            x='name',
+            y='popularity',
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        )
+
+        top_artists_fig = px.bar(
+            artists,
+            x='name',
+            y='popularity',
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        )
+
+        return top_tracks_fig, top_artists_fig
+    except Exception as e:
+        # Return empty graphs if data isn't ready
+        print("Error fetching data:", str(e))
+        return px.bar(title="No Tracks Available"), px.bar(title="No Artists Available")
+
+@app.route('/api/get_data', methods=['GET'])
+def get_data():
+    global dfTracks, dfArtists
+    if dfTracks is None or dfArtists is None:
+        return jsonify({'error': 'Data not available'}), 400
+    
+    return jsonify({
+        'tracks': dfTracks.to_dict(orient='records'),
+        'artists': dfArtists.to_dict(orient='records')
+    })
 
 
 @app.route('/callback')
