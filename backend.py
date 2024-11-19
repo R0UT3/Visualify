@@ -131,11 +131,7 @@ dash_app.layout = html.Div([
 def update_graphs(n_intervals):
     try:
         response = requests.get('https://visualify.onrender.com/api/get_data')  # Adjust URL for deployment
-        if response.status_code == 400:
-            raise ValueError("Data not availableTracks")
-        elif response.status_code == 418:
-            raise ValueError("Data not availableArtists")
-        elif response.status_code != 200:
+        if response.status_code != 200:
             raise ValueError("Data not availableOtro")
 
         data = response.json()
@@ -166,11 +162,7 @@ def update_graphs(n_intervals):
 
 @app.route('/api/get_data', methods=['GET'])
 def get_data():
-    global dfTracks, dfArtists
     access_token = session.get('access_token')
-    if not access_token:
-        return redirect('/login')
-
     sp = spotipy.Spotify(auth=access_token)
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
