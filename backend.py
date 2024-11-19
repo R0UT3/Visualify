@@ -135,6 +135,8 @@ def update_graphs(n_intervals):
             raise ValueError("Data not availableTracks")
         elif response.status_code == 418:
             raise ValueError("Data not availableArtists")
+        elif response.status_code != 200:
+            raise ValueError("Data not availableOtro")
 
         data = response.json()
         tracks = pd.DataFrame(data['tracks'])
