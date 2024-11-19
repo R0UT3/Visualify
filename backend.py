@@ -72,7 +72,7 @@ def analyze():
         'name': artist['name'],
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
-    print(jsonify(track_names))
+    print(jsonify(track_names),flush=True)
 
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
