@@ -131,8 +131,10 @@ dash_app.layout = html.Div([
 def update_graphs(n_intervals):
     try:
         response = requests.get('https://visualify.onrender.com/api/get_data')  # Adjust URL for deployment
-        if response.status_code != 200:
-            raise ValueError("Data not available")
+        if response.status_code == 400:
+            raise ValueError("Data not availableTracks")
+        elif response.status_code == 418:
+            raise ValueError("Data not availableArtists")
 
         data = response.json()
         tracks = pd.DataFrame(data['tracks'])
@@ -170,8 +172,6 @@ def get_data():
     sp = spotipy.Spotify(auth=access_token)
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
-    track_names = [track['name'] for track in top5_tracks['items']]
-    artists_names = [artist['name'] for artist in top5_artists['items']]
     dfTracks = pd.DataFrame([{
         'name': track['name'],
         'popularity': track['popularity'],
@@ -181,10 +181,10 @@ def get_data():
         'name': artist['name'],
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
-    print(jsonify(track_names),flush=True)
-    if dfTracks is None or dfArtists is None:
-        return jsonify({'error': 'Data not available'}), 400
-    
+    if dfTracks is None:
+            return jsonify({'error': 'Data not available'}), 400
+    if dfArtists is None:
+            return jsonify({'error': 'Data not available'}), 418
     return jsonify({
         'tracks': dfTracks.to_dict(orient='records'),
         'artists': dfArtists.to_dict(orient='records')
