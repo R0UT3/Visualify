@@ -15,8 +15,8 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-dfTracks=None
-dfArtists=None
+dfTracks=pd.DataFrame()
+dfArtists=pd.DataFrame()
 
 
 app = Flask(__name__)
