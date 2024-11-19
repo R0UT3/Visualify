@@ -73,7 +73,6 @@ def analyze():
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
     print(jsonify(track_names),flush=True)
-    session['track']=2
     return redirect('/dash')
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 """ dash_app.layout = html.Div([
@@ -164,6 +163,25 @@ def update_graphs(n_intervals):
 @app.route('/api/get_data', methods=['GET'])
 def get_data():
     global dfTracks, dfArtists
+    access_token = session.get('access_token')
+    if not access_token:
+        return redirect('/login')
+
+    sp = spotipy.Spotify(auth=access_token)
+    top5_tracks = sp.current_user_top_tracks(limit=5)
+    top5_artists = sp.current_user_top_artists(limit=5)
+    track_names = [track['name'] for track in top5_tracks['items']]
+    artists_names = [artist['name'] for artist in top5_artists['items']]
+    dfTracks = pd.DataFrame([{
+        'name': track['name'],
+        'popularity': track['popularity'],
+        'artist': track['artists'][0]['name']
+    } for track in top5_tracks['items']])
+    dfArtists = pd.DataFrame([{
+        'name': artist['name'],
+        'popularity': artist['popularity']
+        } for artist in top5_artists['items']])
+    print(jsonify(track_names),flush=True)
     if dfTracks is None or dfArtists is None:
         return jsonify({'error': 'Data not available'}), 400
     
