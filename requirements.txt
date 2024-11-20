@@ -22,3 +22,4 @@ Werkzeug==2.0.2
 spotipy
 python-dotenv
 flask_cors
+sys

@@ -1,4 +1,4 @@
-
+import sys
 from flask import Flask, request, jsonify, redirect, session, render_template
 import spotipy
 from dash import Dash, html, dcc
@@ -72,8 +72,21 @@ def analyze():
         'name': artist['name'],
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
-    print(jsonify(track_names),flush=True)
+    sys.stdout.write(dfTracks)
     return redirect('/dash')
+""" @app.route('/statistics')
+def statistics():
+    global dfTracks, dfArtists """
+
+
+
+
+
+
+
+
+
+
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
 """ dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
