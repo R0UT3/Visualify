@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, session, render_template, render_template_string
+from flask import Flask, request, jsonify, redirect, session, render_template
 import spotipy
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
@@ -66,52 +66,125 @@ def analyze():
         'name': artist['name'],
         'popularity': artist['popularity']
     } for artist in top5_artists['items']]
-
-    df_tracks = pd.DataFrame(dfTracks)
-    df_artists = pd.DataFrame(dfArtists)
-
-    # Generate plots using Plotly
-    track_fig = px.bar(
-        df_tracks,
-        x='name',
-        y='popularity',
-        labels={'x': 'Track Name', 'y': 'Popularity'},
-        title="Top 5 Tracks by Popularity"
-    )
-
-    artist_fig = px.bar(
-        df_artists,
-        x='name',
-        y='popularity',
-        labels={'x': 'Artist Name', 'y': 'Popularity'},
-        title="Top 5 Artists by Popularity"
-    )
-
-    # Convert plots to HTML
-    track_html = track_fig.to_html(full_html=False)
-    artist_html = artist_fig.to_html(full_html=False)
-
-    # Render an HTML page embedding the plots
-    html_template = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Spotify Data Analysis</title>
-    </head>
-    <body>
-        <h1>Spotify Data Analysis</h1>
-        <h2>Top 5 Tracks</h2>
-        {track_html}
-
-        <h2>Top 5 Artists</h2>
-        {artist_html}
-    </body>
-    </html>
-    """
-    return render_template_string(html_template)
+    session['track_data'] = dfTracks
+    session['artist_data'] = dfArtists
+    return redirect('/dash')
 """ @app.route('/statistics')
 def statistics():
     global dfTracks, dfArtists """
+
+
+
+
+
+
+
+
+
+
+dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
+dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
+
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(id='top-tracks-graph'),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(id='top-artists-graph'),
+
+    dcc.Interval(
+        id='data-fetch-interval',
+        interval=1000,  # Check for data every second
+        n_intervals=0
+    )
+])
+@dash_app.callback(
+    [Output('top-tracks-graph', 'figure'),
+     Output('top-artists-graph', 'figure')],
+    [Input('data-fetch-interval', 'n_intervals')]
+)
+def update_graphs(n_intervals):
+    try:
+        response = requests.get('https://visualifybackend.onrender.com/get_data')  # Adjust for deployment
+        if response.status_code != 200:
+            raise ValueError(f"Failed to fetch data: {response.status_code}")
+
+        data = response.json()
+
+        if 'tracks' not in data or not data['tracks']:
+            raise ValueError("No track data available")
+        if 'artists' not in data or not data['artists']:
+            raise ValueError("No artist data available")
+
+        tracks = pd.DataFrame(data['tracks'])
+        artists = pd.DataFrame(data['artists'])
+
+        # Generate figures
+        top_tracks_fig = px.bar(
+            tracks,
+            x='name',
+            y='popularity',
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        )
+
+        top_artists_fig = px.bar(
+            artists,
+            x='name',
+            y='popularity',
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        )
+
+        return top_tracks_fig, top_artists_fig
+
+    except Exception as e:
+        print("Error updating graphs:", str(e))
+        return px.bar(title="No Tracks Available"), px.bar(title="No Artists Available")
+
+""" dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(
+        id='top-tracks-graph',
+        figure=px.bar(
+            dfTracks,
+            x='name',
+            y='popularity',
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        ) if not dfTracks.empty else px.bar(title="No Tracks Available")
+    ),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(
+        id='top-artists-graph',
+        figure=px.bar(
+            dfArtists,
+            x='name',
+            y='popularity',
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        ) if not dfArtists.empty else px.bar(title="No Artists Available")
+    ),
+
+    html.H2("Recommended Songs Based on Top Tracks"),
+    dcc.Graph(id='recommended-tracks-graph')  # This will be updated dynamically later
+]) """
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    # Retrieve data from the session
+    track_data = session.get('track_data', [])
+    artist_data = session.get('artist_data', [])
+
+    if not track_data or not artist_data:
+        return jsonify({'error': 'No data available'}), 404
+
+    return jsonify({
+        'tracks': track_data,
+        'artists': artist_data
+    })
+
 
 @app.route('/callback')
 def callback():
