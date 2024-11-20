@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Unwrapped</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .item {
+            width: 150px;
+            text-align: center;
+        }
+        .item img {
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spotify Unwrapped</h1>
+
+    <div class="section">
+        <h2>Top 5 Songs</h2>
+        <div class="list">
+            {% for track in tracks %}
+            <div class="item">
+                <img src="{{ track.album_image }}" alt="Album Cover">
+                <p><strong>{{ track.name }}</strong></p>
+                <p>{{ track.artist }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Top 5 Artists</h2>
+        <div class="list">
+            {% for artist in artists %}
+            <div class="item">
+                <img src="{{ artist.image or 'placeholder.jpg' }}" alt="Artist Image">
+                <p><strong>{{ artist.name }}</strong></p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Recommended Songs</h2>
+        <div class="list">
+            {% for rec in recommendations %}
+            <div class="item">
+                <img src="{{ rec.album_image }}" alt="Album Cover">
+                <p><strong>{{ rec.name }}</strong></p>
+                <p>{{ rec.artist }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

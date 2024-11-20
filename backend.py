@@ -54,64 +54,41 @@ def analyze():
         return redirect('/login')
 
     sp = spotipy.Spotify(auth=access_token)
+    
+    # Fetch top tracks and artists
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
-    dfTracks = [{
+
+    # Prepare the data
+    tracks = [{
         'name': track['name'],
-        'popularity': track['popularity'],
-        'artist': track['artists'][0]['name']
+        'artist': track['artists'][0]['name'],
+        'album_image': track['album']['images'][0]['url']  # Album cover
     } for track in top5_tracks['items']]
 
-    dfArtists = [{
+    artists = [{
         'name': artist['name'],
-        'popularity': artist['popularity']
+        'image': artist['images'][0]['url'] if artist['images'] else None  # Artist image
     } for artist in top5_artists['items']]
 
-    df_tracks = pd.DataFrame(dfTracks)
-    df_artists = pd.DataFrame(dfArtists)
+    # Fetch recommended songs (based on the first top track)
+    recommendations = []
+    if top5_tracks['items']:
+        recs = sp.recommendations(seed_tracks=[top5_tracks['items'][0]['id']], limit=3)
+        recommendations = [{
+            'name': rec['name'],
+            'artist': rec['artists'][0]['name'],
+            'album_image': rec['album']['images'][0]['url']
+        } for rec in recs['tracks']]
 
-    # Generate plots using Plotly
-    track_fig = px.bar(
-        df_tracks,
-        x='name',
-        y='popularity',
-        labels={'x': 'Track Name', 'y': 'Popularity'},
-        title="Top 5 Tracks by Popularity"
+    # Render the template
+    return render_template(
+        'spotify_unwrapped.html',
+        tracks=tracks,
+        artists=artists,
+        recommendations=recommendations
     )
 
-    artist_fig = px.bar(
-        df_artists,
-        x='name',
-        y='popularity',
-        labels={'x': 'Artist Name', 'y': 'Popularity'},
-        title="Top 5 Artists by Popularity"
-    )
-
-    # Convert plots to HTML
-    track_html = track_fig.to_html(full_html=False)
-    artist_html = artist_fig.to_html(full_html=False)
-
-    # Render an HTML page embedding the plots
-    html_template = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Spotify Data Analysis</title>
-    </head>
-    <body>
-        <h1>Spotify Data Analysis</h1>
-        <h2>Top 5 Tracks</h2>
-        {track_html}
-
-        <h2>Top 5 Artists</h2>
-        {artist_html}
-    </body>
-    </html>
-    """
-    return render_template_string(html_template)
-""" @app.route('/statistics')
-def statistics():
-    global dfTracks, dfArtists """
 
 @app.route('/callback')
 def callback():
