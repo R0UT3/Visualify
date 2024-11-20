@@ -56,17 +56,16 @@ def analyze():
     sp = spotipy.Spotify(auth=access_token)
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
-    track_names = [track['name'] for track in top5_tracks['items']]
-    artists_names = [artist['name'] for artist in top5_artists['items']]
-    dfTracks = pd.DataFrame([{
+    dfTracks = [{
         'name': track['name'],
         'popularity': track['popularity'],
         'artist': track['artists'][0]['name']
-    } for track in top5_tracks['items']])
-    dfArtists = pd.DataFrame([{
+    } for track in top5_tracks['items']]
+
+    dfArtists = [{
         'name': artist['name'],
         'popularity': artist['popularity']
-        } for artist in top5_artists['items']])
+    } for artist in top5_artists['items']]
     session['track_data'] = dfTracks
     session['artist_data'] = dfArtists
     return redirect('/dash')
