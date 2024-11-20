@@ -1,4 +1,3 @@
-import sys
 from flask import Flask, request, jsonify, redirect, session, render_template
 import spotipy
 from dash import Dash, html, dcc
@@ -15,9 +14,6 @@ import requests
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-dfTracks=pd.DataFrame()
-dfArtists=pd.DataFrame()
-
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))
@@ -53,7 +49,6 @@ spotify_data = {}
 
 @app.route('/analyze')
 def analyze():
-    global dfTracks, dfArtists
     access_token = session.get('access_token')
     if not access_token:
         return redirect('/login')
@@ -72,7 +67,8 @@ def analyze():
         'name': artist['name'],
         'popularity': artist['popularity']
         } for artist in top5_artists['items']])
-    sys.stdout.write(dfTracks)
+    session['track_data'] = dfTracks
+    session['artist_data'] = dfArtists
     return redirect('/dash')
 """ @app.route('/statistics')
 def statistics():
@@ -88,6 +84,65 @@ def statistics():
 
 
 dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
+dash_app.layout = html.Div([
+    html.H1("Spotify Data Visualization"),
+
+    html.H2("Top 5 Tracks"),
+    dcc.Graph(id='top-tracks-graph'),
+
+    html.H2("Top 5 Artists"),
+    dcc.Graph(id='top-artists-graph'),
+
+    dcc.Interval(
+        id='data-fetch-interval',
+        interval=1000,  # Check for data every second
+        n_intervals=0
+    )
+])
+@dash_app.callback(
+    [Output('top-tracks-graph', 'figure'),
+     Output('top-artists-graph', 'figure')],
+    [Input('data-fetch-interval', 'n_intervals')]
+)
+def update_graphs(n_intervals):
+    try:
+        response = requests.get('https://visualifybackend.onrender.com/get_data')  # Adjust for deployment
+        if response.status_code != 200:
+            raise ValueError(f"Failed to fetch data: {response.status_code}")
+
+        data = response.json()
+
+        if 'tracks' not in data or not data['tracks']:
+            raise ValueError("No track data available")
+        if 'artists' not in data or not data['artists']:
+            raise ValueError("No artist data available")
+
+        tracks = pd.DataFrame(data['tracks'])
+        artists = pd.DataFrame(data['artists'])
+
+        # Generate figures
+        top_tracks_fig = px.bar(
+            tracks,
+            x='name',
+            y='popularity',
+            labels={'x': 'Track', 'y': 'Popularity'},
+            title="Top 5 Tracks by Popularity"
+        )
+
+        top_artists_fig = px.bar(
+            artists,
+            x='name',
+            y='popularity',
+            labels={'x': 'Artist', 'y': 'Popularity'},
+            title="Top 5 Artists by Popularity"
+        )
+
+        return top_tracks_fig, top_artists_fig
+
+    except Exception as e:
+        print("Error updating graphs:", str(e))
+        return px.bar(title="No Tracks Available"), px.bar(title="No Artists Available")
+
 """ dash_app.layout = html.Div([
     html.H1("Spotify Data Visualization"),
     html.H2("Top 5 Tracks"),
@@ -117,84 +172,18 @@ dash_app = Dash(__name__, server=app, url_base_pathname='/dash/')
     html.H2("Recommended Songs Based on Top Tracks"),
     dcc.Graph(id='recommended-tracks-graph')  # This will be updated dynamically later
 ]) """
-from dash.dependencies import Output, Input
-import requests
-
-dash_app.layout = html.Div([
-    html.H1("Spotify Data Visualization"),
-
-    html.H2("Top 5 Tracks"),
-    dcc.Graph(id='top-tracks-graph'),
-
-    html.H2("Top 5 Artists"),
-    dcc.Graph(id='top-artists-graph'),
-
-    dcc.Interval(
-        id='data-fetch-interval',
-        interval=1000,  # Check for data every second
-        n_intervals=0
-    )
-])
-
-@dash_app.callback(
-    [Output('top-tracks-graph', 'figure'),
-     Output('top-artists-graph', 'figure')],
-    [Input('data-fetch-interval', 'n_intervals')]
-)
-def update_graphs(n_intervals):
-    try:
-        response = requests.get('https://visualify.onrender.com/api/get_data')  # Adjust URL for deployment
-        if response.status_code != 200:
-            raise ValueError("Data not availableOtro{}",response.status_code)
-
-        data = response.json()
-        tracks = pd.DataFrame(data['tracks'])
-        artists = pd.DataFrame(data['artists'])
-
-        top_tracks_fig = px.bar(
-            tracks,
-            x='name',
-            y='popularity',
-            labels={'x': 'Track', 'y': 'Popularity'},
-            title="Top 5 Tracks by Popularity"
-        )
-
-        top_artists_fig = px.bar(
-            artists,
-            x='name',
-            y='popularity',
-            labels={'x': 'Artist', 'y': 'Popularity'},
-            title="Top 5 Artists by Popularity"
-        )
-
-        return top_tracks_fig, top_artists_fig
-    except Exception as e:
-        # Return empty graphs if data isn't ready
-        print("Error fetching data:", str(e))
-        return px.bar(title="No Tracks Available"), px.bar(title="No Artists Available")
-
-@app.route('/api/get_data', methods=['GET'])
+@app.route('/get_data', methods=['GET'])
 def get_data():
-    access_token = session.get('access_token')
-    sp = spotipy.Spotify(auth=access_token)
-    top5_tracks = sp.current_user_top_tracks(limit=5)
-    top5_artists = sp.current_user_top_artists(limit=5)
-    dfTracks = pd.DataFrame([{
-        'name': track['name'],
-        'popularity': track['popularity'],
-        'artist': track['artists'][0]['name']
-    } for track in top5_tracks['items']])
-    dfArtists = pd.DataFrame([{
-        'name': artist['name'],
-        'popularity': artist['popularity']
-        } for artist in top5_artists['items']])
-    if dfTracks is None:
-            return jsonify({'error': 'Data not available'}), 400
-    if dfArtists is None:
-            return jsonify({'error': 'Data not available'}), 418
+    # Retrieve data from the session
+    track_data = session.get('track_data', [])
+    artist_data = session.get('artist_data', [])
+
+    if not track_data or not artist_data:
+        return jsonify({'error': 'No data available'}), 404
+
     return jsonify({
-        'tracks': dfTracks.to_dict(orient='records'),
-        'artists': dfArtists.to_dict(orient='records')
+        'tracks': track_data,
+        'artists': artist_data
     })
 
 
