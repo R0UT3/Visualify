@@ -83,7 +83,7 @@ def analyze():
 
     # Render the template
     return render_template(
-        'spotify_unwrapped.html',
+        'template/spotify_unwrapped.html',
         tracks=tracks,
         artists=artists,
         recommendations=recommendations
