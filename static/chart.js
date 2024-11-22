@@ -25,11 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
         data: data,
         options: {
             responsive: true,
+            maintainAspectRatio: false, // This allows custom sizing
             scales: {
                 r: {
                     angleLines: { color: '#ffffff' },
                     grid: { color: '#888' },
-                    pointLabels: { color: '#ffffff' }
+                    pointLabels: { color: '#ffffff' },
+                    ticks: {
+                        display: false // This removes the numeric labels
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 1
                 }
             }
         }
