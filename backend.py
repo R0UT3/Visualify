@@ -59,6 +59,11 @@ def analyze():
     top5_tracks = sp.current_user_top_tracks(limit=5)
     top5_artists = sp.current_user_top_artists(limit=5)
 
+    #Also get top50 songs and their characteristics to have them as inputs for the cluster model and 
+    # for getting the most important characteristics for the listener
+    top50_tracks = sp.current_user_top_tracks(limit=50)
+    track_ids = [track['id'] for track in top50_tracks['items']]
+    audio_features = sp.audio_features(track_ids)
     # Prepare the data
     tracks = [{
         'name': track['name'],
@@ -82,12 +87,13 @@ def analyze():
         } for rec in recs['tracks']]
 
     # Render the template
-    return render_template(
+    """ return render_template(
         'spotify_unwrapped.html',
         tracks=tracks,
         artists=artists,
-        recommendations=recommendations
-    )
+        recommendations=recommendations) """
+    return jsonify(audio_features)
+    
 
 
 @app.route('/callback')
