@@ -3,30 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Data Analysis</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <title>Visualify</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <a href="https://visualifybackend.onrender.com/login">
-        <button>Log in with Spotify</button>
-    </a>
-    <p>Enter your Spotify username or upload a JSON file with your streaming data:</p>
-
-    <!-- Form for uploading a JSON file or entering a username -->
-    <form id="spotify-form">
-        <label for="username">Spotify Username (optional):</label>
-        <input type="text" id="username" name="username" placeholder="Enter your Spotify username">
-
-        <p>OR</p>
-
-        <label for="file">Upload JSON File:</label>
-        <input type="file" id="file" name="file" accept=".json">
-
-        <br><br>
-        <button type="submit">Submit</button>
-    </form>
-    <div id="result"></div>
-
-    <script src="scripts.js"></script> <!-- Javascript for handling API calls -->
+    <div class="container">
+        <h1>Welcome to Visualify</h1>
+        <p>Explore your Spotify listening habits and visualize your top tracks and artists.</p>
+        <a href="https://visualifybackend.onrender.com/login" class="button-link">
+            <button class="spotify-login-button">Log in with Spotify</button>
+        </a>
+    </div>
 </body>
 </html>
+
