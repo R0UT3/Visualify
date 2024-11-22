@@ -1,7 +1,8 @@
-const averageFeatures = JSON.parse('{{ average_features | safe }}');
+// Data is already in JSON format, no need to parse
+const averageFeatures = {{ average_features | safe }};
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Parsed Average Features:', averageFeatures);
+    console.log('Average Features:', averageFeatures);
     
     const ctx = document.getElementById('radarChart');
     if (!ctx) {
