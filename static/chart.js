@@ -25,14 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
         data: data,
         options: {
             responsive: true,
-            maintainAspectRatio: false, // This allows custom sizing
+            maintainAspectRatio: false,
             scales: {
                 r: {
                     angleLines: { color: '#ffffff' },
                     grid: { color: '#888' },
-                    pointLabels: { color: '#ffffff' },
+                    pointLabels: { 
+                        color: '#ffffff',
+                        font: {
+                            size: 14 // Increase font size of the labels
+                        }
+                    },
                     ticks: {
-                        display: false // This removes the numeric labels
+                        display: false
                     },
                     suggestedMin: 0,
                     suggestedMax: 1
