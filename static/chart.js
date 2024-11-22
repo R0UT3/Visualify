@@ -1,14 +1,12 @@
-// Data is already in JSON format, no need to parse
-const averageFeatures = {{ average_features | safe }};
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Average Features:', averageFeatures);
-    
-    const ctx = document.getElementById('radarChart');
-    if (!ctx) {
+    const canvas = document.getElementById('radarChart');
+    if (!canvas) {
         console.error('Canvas not found');
         return;
     }
+
+    const averageFeatures = JSON.parse(canvas.dataset.features);
+    console.log('Average Features:', averageFeatures);
     
     const data = {
         labels: Object.keys(averageFeatures),
@@ -37,5 +35,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    new Chart(ctx.getContext('2d'), config);
+    new Chart(canvas.getContext('2d'), config);
 });
