@@ -1,5 +1,18 @@
 // Data passed from Flask backend
 const averageFeatures = JSON.parse('{{ average_features | tojson | safe }}');
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        console.log('Average Features:', averageFeatures);
+        const ctx = document.getElementById('radarChart');
+        if (!ctx) {
+            console.error('Canvas not found');
+            return;
+        }
+        new Chart(ctx.getContext('2d'), config);
+    } catch (error) {
+        console.error('Chart rendering error:', error);
+    }
+});
 // Prepare data for the radar chart
 const data = {
     labels: Object.keys(averageFeatures),
