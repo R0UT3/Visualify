@@ -1,7 +1,7 @@
 const averageFeatures = JSON.parse('{{ average_features | safe }}');
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Average Features:', averageFeatures);
+    console.log('Parsed Average Features:', averageFeatures);
     
     const ctx = document.getElementById('radarChart');
     if (!ctx) {

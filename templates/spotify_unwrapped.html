@@ -85,6 +85,9 @@
         <canvas id="radarChart"></canvas>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        console.log('Raw average_features:', '{{ average_features | safe }}');
+    </script>
 <script src="{{ url_for('static', filename='chart.js') }}"></script>
 </body>
 </html>
