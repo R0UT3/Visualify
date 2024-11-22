@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const averageFeatures = JSON.parse(canvas.dataset.features);
+    console.log('Average Features:', averageFeatures);
     
     const data = {
         labels: Object.keys(averageFeatures),
@@ -14,9 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
             data: Object.values(averageFeatures),
             backgroundColor: 'rgba(29, 185, 84, 0.2)',
             borderColor: 'rgba(29, 185, 84, 1)',
-            borderWidth: 3,  // Made border thicker
-            pointBackgroundColor: 'rgba(29, 185, 84, 1)',
-            pointRadius: 6   // Made points bigger
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(29, 185, 84, 1)'
         }]
     };
 
@@ -25,31 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
         data: data,
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // This allows custom sizing
             scales: {
                 r: {
                     angleLines: { color: '#ffffff' },
                     grid: { color: '#888' },
-                    pointLabels: { 
-                        color: '#ffffff',
-                        font: {
-                            size: 24  // Increased font size
-                        }
-                    },
+                    pointLabels: { color: '#ffffff' },
                     ticks: {
-                        display: false
+                        display: false // This removes the numeric labels
                     },
                     suggestedMin: 0,
                     suggestedMax: 1
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        font: {
-                            size: 24  // Increased legend font size
-                        }
-                    }
                 }
             }
         }

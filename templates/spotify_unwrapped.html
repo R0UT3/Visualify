@@ -81,9 +81,8 @@
     </div>
     <div class="section">
         <h2>Your Favorite Characteristics</h2>
-        <div style="position: relative; width: 1200px; height: 1200px; margin: 20px auto;">
-            <canvas id="radarChart" data-features='{{ average_features | safe }}'></canvas>
-        </div>
+        <!-- Radar Chart Container -->
+        <canvas id="radarChart" data-features='{{ average_features | safe }}'></canvas>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
