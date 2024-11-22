@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import json
 import requests
+import numpy as np
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
@@ -76,6 +77,11 @@ def analyze():
         'image': artist['images'][0]['url'] if artist['images'] else None  # Artist image
     } for artist in top5_artists['items']]
 
+    feature_keys = ['danceability', 'energy', 'valence', 'speechiness', 'instrumentalness', 'acousticness']
+    average_features = {
+        feature: np.mean([track[feature] for track in audio_features if track and track[feature] is not None])
+        for feature in feature_keys
+    }
     # Fetch recommended songs (based on the first top track)
     recommendations = []
     if top5_tracks['items']:
@@ -87,13 +93,13 @@ def analyze():
         } for rec in recs['tracks']]
 
     # Render the template
-    """ return render_template(
+    return render_template(
         'spotify_unwrapped.html',
         tracks=tracks,
         artists=artists,
-        recommendations=recommendations) """
-    return jsonify(audio_features)
-    
+        recommendations=recommendations,
+        average_features=json.dumps(average_features)
+    )
 
 
 @app.route('/callback')
