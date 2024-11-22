@@ -82,6 +82,8 @@ def analyze():
         feature: np.mean([track[feature] for track in audio_features if track and track[feature] is not None])
         for feature in feature_keys
     }
+    average_features = {k: float(v) for k, v in average_features.items()}
+
     # Fetch recommended songs (based on the first top track)
     recommendations = []
     if top5_tracks['items']:
