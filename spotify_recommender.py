@@ -66,7 +66,7 @@ class SpotifyRecommender:
             
         return pd.DataFrame(processed_features)
     
-    def get_recommendations_from_spotify_features(self, spotify_features_list, n_recommendations=10):
+    def get_recommendations(self, spotify_features_list, n_recommendations=10):
         """
         Get recommendations based on Spotify API audio features
         
