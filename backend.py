@@ -12,6 +12,7 @@ from flask_cors import CORS
 import json
 import requests
 import numpy as np
+from spotify_recommender import SpotifyRecommender
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
@@ -32,20 +33,6 @@ def login():
 client_credential_manager = SpotifyClientCredentials(client_id=SPOTIFY_CLIENT_ID, client_secret=SPOTIFY_CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credential_manager)
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'json'
-def extract_useful_data(json_obj):
-    return {
-        "timestamp": json_obj.get("ts"),
-        "track_name": json_obj.get("master_metadata_track_name"),
-        "artist_name": json_obj.get("master_metadata_album_artist_name"),
-        "album_name": json_obj.get("master_metadata_album_album_name"),
-        "duration_ms": json_obj.get("ms_played"),
-        "platform": json_obj.get("platform"),
-        "country": json_obj.get("conn_country"),
-        "shuffle": json_obj.get("shuffle"),
-        "offline": json_obj.get("offline")
-    }
 spotify_data = {}
 
 @app.route('/analyze')
@@ -93,6 +80,46 @@ def analyze():
             'artist': rec['artists'][0]['name'],
             'album_image': rec['album']['images'][0]['url']
         } for rec in recs['tracks']]
+    #Songs from Spotify 2023 using a ML model
+    dataset_path = "spotify-2023.csv"
+    recommender = SpotifyRecommender(dataset_path)
+    # Get recommendations
+    top50_features = [
+    {
+        "acousticness": feature["acousticness"],
+        "danceability": feature["danceability"],
+        "energy": feature["energy"],
+        "instrumentalness": feature["instrumentalness"],
+        "speechiness": feature["speechiness"],
+        "valence": feature["valence"]
+    }
+    for feature in audio_features if feature is not None
+]
+    recsApp = recommender.get_recommendations(top50_features, n_recommendations=5)
+    #Call the API to get the Album picture of the songs
+    spotify_data = []
+    recs=recsApp[['track_name', 'artist(s)_name']]
+    for rec in recs:
+        query = f"{rec['track_name']} {rec['artist_name']}"
+        result = sp.search(q=query, type='track', limit=1)
+        if result['tracks']['items']:  # Ensure at least one result was found
+            track = result['tracks']['items'][0]
+            spotify_data.append({
+                "name": track['name'],
+                "artist": ', '.join(artist['name'] for artist in track['artists']),
+                "album_image": track['album']['images'][0]['url'],  # Album cover image
+                "id": track['id']  # Spotify track ID
+            })
+        else:
+            spotify_data.append({
+                "name": rec['track_name'],
+                "artist": rec['artist_name'],
+                "album_image": None,  # No album cover if not found
+                "id": None  # No track ID if not found
+            })
+
+
+
 
     # Render the template
     return render_template(
@@ -100,6 +127,7 @@ def analyze():
         tracks=tracks,
         artists=artists,
         recommendations=recommendations,
+        recs=spotify_data,
         average_features=json.dumps(average_features)
     )
 
