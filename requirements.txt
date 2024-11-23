@@ -23,3 +23,4 @@ spotipy
 python-dotenv
 flask_cors
 scikit-learn
+logging

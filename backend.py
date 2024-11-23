@@ -12,6 +12,7 @@ from flask_cors import CORS
 import json
 import requests
 import numpy as np
+import logging
 from spotify_recommender import SpotifyRecommender
 load_dotenv()
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
@@ -99,6 +100,7 @@ def analyze():
     #Call the API to get the Album picture of the songs
     spotify_data = []
     recs=recsApp[['track_name', 'artist(s)_name']]
+    app.logger.info(recs)
     for i in range(0,4):
         query = f"{recs[i][0]} {recs[i][1]}"
         result = sp.search(q=query, type='track', limit=1)
