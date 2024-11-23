@@ -99,8 +99,8 @@ def analyze():
     #Call the API to get the Album picture of the songs
     spotify_data = []
     recs=recsApp[['track_name', 'artist(s)_name']]
-    for rec in recs:
-        query = f"{rec['track_name']} {rec['artist_name']}"
+    for i in range(0,4):
+        query = f"{recs[i][0]} {recs[i][1]}"
         result = sp.search(q=query, type='track', limit=1)
         if result['tracks']['items']:  # Ensure at least one result was found
             track = result['tracks']['items'][0]
