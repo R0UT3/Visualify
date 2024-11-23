@@ -102,7 +102,7 @@ def analyze():
     recs=recsApp[['track_name', 'artist(s)_name']]
     app.logger.info(recs)
     for i in range(0,4):
-        query = f"{recs[i][0]} {recs[i][1]}"
+        query = f"{recs.iloc[i]['track_name']} {recs.iloc[i]['artist(s)_name']}"
         result = sp.search(q=query, type='track', limit=1)
         if result['tracks']['items']:  # Ensure at least one result was found
             track = result['tracks']['items'][0]
@@ -114,8 +114,8 @@ def analyze():
             })
         else:
             spotify_data.append({
-                "name": rec['track_name'],
-                "artist": rec['artist_name'],
+                "name": recs['track_name'],
+                "artist": recs['artist_name'],
                 "album_image": None,  # No album cover if not found
                 "id": None  # No track ID if not found
             })
