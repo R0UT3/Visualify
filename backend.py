@@ -66,7 +66,7 @@ def analyze():
     artists = [{
         'name': artist['name'],
         'image': artist['images'][0]['url'] if artist['images'] else None,
-        'id': track['id']
+        'id': artists['id']
     } for artist in top5_artists['items']]
 
     feature_keys = ['danceability', 'energy', 'valence', 'speechiness', 'instrumentalness', 'acousticness']
@@ -84,7 +84,7 @@ def analyze():
             'name': rec['name'],
             'artist': rec['artists'][0]['name'],
             'album_image': rec['album']['images'][0]['url'],
-            'id': track['id']
+            'id': rec['id']
         } for rec in recs['tracks']]
     #Songs from Spotify 2023 using a ML model
     dataset_path = "spotify-2023.csv"
