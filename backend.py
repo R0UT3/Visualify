@@ -65,8 +65,7 @@ def analyze():
 
     artists = [{
         'name': artist['name'],
-        'image': artist['images'][0]['url'] if artist['images'] else None,
-        'id': artists['id']
+        'image': artist['images'][0]['url'] if artist['images'] else None
     } for artist in top5_artists['items']]
 
     feature_keys = ['danceability', 'energy', 'valence', 'speechiness', 'instrumentalness', 'acousticness']
