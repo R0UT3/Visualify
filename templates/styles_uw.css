@@ -40,6 +40,35 @@
     transform: scale(1.05);
 }
 
+
+.item:hover .play-overlay {
+    opacity: 1;
+}
+
+.playing .play-button {
+    background: #ff4444;
+}
+
+
+
+.playing .play-icon {
+    display: none;
+}
+
+.pause-icon {
+    display: none;
+}
+
+.playing .pause-icon {
+    display: block;
+}
+
+
+.playing .now-playing-indicator {
+    display: block;
+}
+
+
 .play-overlay {
     position: absolute;
     top: 0;
@@ -55,13 +84,10 @@
     border-radius: 8px;
 }
 
-.item:hover .play-overlay {
-    opacity: 1;
-}
-
+/* Make the play button smaller */
 .play-button {
-    width: 50px;
-    height: 50px;
+    width: 30px;  /* Reduced from 50px */
+    height: 30px; /* Reduced from 50px */
     background: #1DB954;
     border-radius: 50%;
     display: flex;
@@ -70,40 +96,22 @@
     cursor: pointer;
 }
 
-.playing .play-button {
-    background: #ff4444;
-}
-
+/* Adjust the icon size */
 .play-icon, .pause-icon {
-    width: 24px;
-    height: 24px;
+    width: 16px;    /* Reduced from 24px */
+    height: 16px;   /* Reduced from 24px */
     fill: white;
 }
 
-.playing .play-icon {
-    display: none;
-}
-
-.pause-icon {
-    display: none;
-}
-
-.playing .pause-icon {
-    display: block;
-}
-
+/* Adjust the "Now Playing" text */
 .now-playing-indicator {
     position: absolute;
-    bottom: 60px;
+    bottom: 5px;    /* Adjusted from 60px */
     left: 0;
     width: 100%;
     text-align: center;
     color: #1DB954;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
     display: none;
-}
-
-.playing .now-playing-indicator {
-    display: block;
 }
