@@ -5,40 +5,7 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Unwrapped</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .section {
-            margin: 20px 0;
-        }
-        .list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .item {
-            width: 150px;
-            text-align: center;
-        }
-        .item img {
-            width: 100%;
-            border-radius: 8px;
-        }
-        canvas {
-            max-width: 600px;
-            margin: 20px auto;
-            display: block;
-        }
-    </style>
+    <style type="/styles_uw.css"></style>
 </head>
 <body>
     <h1>Spotify Unwrapped</h1>
@@ -47,14 +14,28 @@
         <h2>Top 5 Songs</h2>
         <div class="list">
             {% for track in tracks %}
-            <div class="item">
+            <div class="item" data-track-id="{{ track.id }}">
                 <img src="{{ track.album_image }}" alt="Album Cover">
+                <div class="play-overlay">
+                    <div class="play-button">
+                        <svg class="play-icon" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="now-playing-indicator">Now Playing</div>
                 <p><strong>{{ track.name }}</strong></p>
                 <p>{{ track.artist }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
+
+
+
 
     <div class="section">
         <h2>Top 5 Artists</h2>
@@ -72,14 +53,30 @@
         <h2>Recommended Songs by Spotify</h2>
         <div class="list">
             {% for rec in recommendations %}
-            <div class="item">
+            <div class="item" data-track-id="{{ rec.id }}">
                 <img src="{{ rec.album_image }}" alt="Album Cover">
+                <div class="play-overlay">
+                    <div class="play-button">
+                        <svg class="play-icon" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="now-playing-indicator">Now Playing</div>
                 <p><strong>{{ rec.name }}</strong></p>
                 <p>{{ rec.artist }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
+
+
+
+
+
     <div class="section">
         <h2>Your Favorite Characteristics</h2>
         <!-- Radar Chart Container --><div style="height: 500px;"> <!-- Adjust this value to make chart bigger/smaller -->
@@ -91,14 +88,131 @@
         <h2>Recommended Songs using our Model</h2>
         <div class="list">
             {% for rec in recs %}
-            <div class="item">
+            <div class="item" data-track-id="{{ rec.id }}">
                 <img src="{{ rec.album_image }}" alt="Album Cover">
+                <div class="play-overlay">
+                    <div class="play-button">
+                        <svg class="play-icon" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="now-playing-indicator">Now Playing</div>
                 <p><strong>{{ rec.name }}</strong></p>
                 <p>{{ rec.artist }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
+    
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script>
+        let player = null;
+        let deviceId = null;
+        let currentlyPlaying = null;
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            const token = '{{ session.get("access_token") }}';
+            
+            player = new Spotify.Player({
+                name: 'Visualify Web Player',
+                getOAuthToken: cb => { cb(token); }
+            });
+
+            // Error handling
+            player.addListener('initialization_error', ({ message }) => {
+                console.error('Failed to initialize', message);
+            });
+            player.addListener('authentication_error', ({ message }) => {
+                console.error('Failed to authenticate', message);
+            });
+            player.addListener('account_error', ({ message }) => {
+                console.error('Failed to validate Spotify account', message);
+            });
+            player.addListener('playback_error', ({ message }) => {
+                console.error('Failed to perform playback', message);
+            });
+
+            // Playback status updates
+            player.addListener('player_state_changed', state => {
+                if (state) {
+                    updatePlaybackState(state);
+                }
+            });
+
+            // Ready
+            player.addListener('ready', ({ device_id }) => {
+                console.log('Ready with Device ID', device_id);
+                deviceId = device_id;
+            });
+
+            // Connect to the player
+            player.connect();
+        };
+
+        // Handle clicks on tracks
+        document.querySelectorAll('.item').forEach(item => {
+            item.addEventListener('click', async () => {
+                if (!player || !deviceId) {
+                    console.error('Player not ready');
+                    return;
+                }
+
+                const trackId = item.dataset.trackId;
+                
+                if (currentlyPlaying === trackId) {
+                    // If clicking the currently playing track, pause it
+                    await fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer {{ session.get("access_token") }}`
+                        }
+                    });
+                    item.classList.remove('playing');
+                    currentlyPlaying = null;
+                } else {
+                    // Play the clicked track
+                    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer {{ session.get("access_token") }}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            uris: [`spotify:track:${trackId}`]
+                        })
+                    });
+
+                    // Update UI
+                    document.querySelectorAll('.item').forEach(el => {
+                        el.classList.remove('playing');
+                    });
+                    item.classList.add('playing');
+                    currentlyPlaying = trackId;
+                }
+            });
+        });
+
+        function updatePlaybackState(state) {
+            const isPlaying = !state.paused;
+            const currentTrackId = state.track_window.current_track.id;
+            
+            document.querySelectorAll('.item').forEach(item => {
+                if (item.dataset.trackId === currentTrackId && isPlaying) {
+                    item.classList.add('playing');
+                } else {
+                    item.classList.remove('playing');
+                }
+            });
+        }
+    </script>
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         console.log('Raw average_features:', '{{ average_features | safe }}');

@@ -23,7 +23,9 @@ app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))
 CORS(app, resources={r"/*": {"origins": "https://visualify.onrender.com"}})
 SPOTIFY_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
 REDIRECT_URI = "https://visualifybackend.onrender.com/callback"  # Or your deployed URL
-SCOPE = "user-top-read"  # The scope required to access top tracks
+SCOPE = "user-top-read user-read-playback-state user-modify-playback-state streaming"
+
+  # The scope required to access top tracks
 
 @app.route('/login')
 def login():
@@ -57,12 +59,14 @@ def analyze():
     tracks = [{
         'name': track['name'],
         'artist': track['artists'][0]['name'],
-        'album_image': track['album']['images'][0]['url']  # Album cover
+        'album_image': track['album']['images'][0]['url'],
+        'id': track['id']  
     } for track in top5_tracks['items']]
 
     artists = [{
         'name': artist['name'],
-        'image': artist['images'][0]['url'] if artist['images'] else None  # Artist image
+        'image': artist['images'][0]['url'] if artist['images'] else None,
+        'id': track['id']
     } for artist in top5_artists['items']]
 
     feature_keys = ['danceability', 'energy', 'valence', 'speechiness', 'instrumentalness', 'acousticness']
@@ -79,7 +83,8 @@ def analyze():
         recommendations = [{
             'name': rec['name'],
             'artist': rec['artists'][0]['name'],
-            'album_image': rec['album']['images'][0]['url']
+            'album_image': rec['album']['images'][0]['url'],
+            'id': track['id']
         } for rec in recs['tracks']]
     #Songs from Spotify 2023 using a ML model
     dataset_path = "spotify-2023.csv"
