@@ -1,55 +1,77 @@
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .section {
-            margin: 20px 0;
-        }
-        .list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .item {
-            width: 150px;
-            text-align: center;
-        }
-        .item img {
-            width: 100%;
-            border-radius: 8px;
-        }
-        canvas {
-            max-width: 600px;
-            margin: 20px auto;
-            display: block;
-        }
-    .item {
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.section {
+    margin: 20px 0;
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Combined item styles */
+.item {
+    width: 150px;
+    text-align: center;
     position: relative;
     cursor: pointer;
     transition: transform 0.2s;
 }
 
-.item:hover {
-    transform: scale(1.05);
+.item img {
+    width: 100%;
+    border-radius: 8px;
+    height: 150px;
+    object-fit: cover;
 }
 
+/* Play button overlay styles */
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150px; /* Match the height of the image */
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 8px;
+}
 
 .item:hover .play-overlay {
     opacity: 1;
 }
 
-.playing .play-button {
-    background: #ff4444;
+.play-button {
+    width: 30px;
+    height: 30px;
+    background: #1DB954;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-
+.play-icon, .pause-icon {
+    width: 16px;
+    height: 16px;
+    fill: white;
+}
 
 .playing .play-icon {
     display: none;
@@ -63,50 +85,9 @@
     display: block;
 }
 
-
-.playing .now-playing-indicator {
-    display: block;
-}
-
-
-.play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-    border-radius: 8px;
-}
-
-/* Make the play button smaller */
-.play-button {
-    width: 30px;  /* Reduced from 50px */
-    height: 30px; /* Reduced from 50px */
-    background: #1DB954;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-
-/* Adjust the icon size */
-.play-icon, .pause-icon {
-    width: 16px;    /* Reduced from 24px */
-    height: 16px;   /* Reduced from 24px */
-    fill: white;
-}
-
-/* Adjust the "Now Playing" text */
 .now-playing-indicator {
     position: absolute;
-    bottom: 5px;    /* Adjusted from 60px */
+    bottom: 5px;
     left: 0;
     width: 100%;
     text-align: center;
@@ -114,4 +95,14 @@
     font-size: 11px;
     font-weight: bold;
     display: none;
+}
+
+.playing .now-playing-indicator {
+    display: block;
+}
+
+canvas {
+    max-width: 600px;
+    margin: 20px auto;
+    display: block;
 }
